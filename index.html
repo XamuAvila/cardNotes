@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card Notes</title>
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="./node_modules//bootstrap/dist/css/bootstrap.min.css">
+    <script src="./node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="./node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="./node_modules//moment/min/moment.min.js"></script>
+</head>
+
+<body>
+    <div class="container main-row">
+        <div class="row justify-content-center" id="cards">
+
+        </div>
+    </div>
+    <div class="modal fade" id="modalCard" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Create Card</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="formAddCard">
+                        <div class="form-group">
+                            <label for="title">Title</label>
+                            <input type="text" class="form-control" id="title" aria-describedby="title"
+                                placeholder="Enter Title">
+                        </div>
+                        <div class="form-group">
+                            <label for="subtitle">Subtitle</label>
+                            <input type="text" class="form-control" id="subtitle" placeholder="Subtitle">
+                        </div>
+                        <div class="form-group">
+                            <label for="content">Content</label>
+                            <input type="text" class="form-control" id="content" placeholder="Content">
+                        </div>
+                        <div id="lastModifyModal" class="form-group" style="display: block;">
+                            <label for="content">Last Modify</label>
+                            <input type="text" class="form-control" id="dateModify" placeholder="DateModify">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button id="closeCardModal" type="button" class="btn btn-secondary"
+                        data-dismiss="modal">Close</button>
+                    <button id="saveCardModal" type="button" class="btn btn-primary">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<footer>
+    <button id="addNote" data-toggle="modal" data-target="#modalCard" class="btn btn-success btn-add-note">Add
+        Note</button>
+</footer>
+<script>
+    let cards = [];
+    $(document).ready(() => {
+        $('#addNote').on("click", () => {
+            $('#saveCardModal').show();
+            $('#title').attr('disabled', false);
+            $('#subtitle').attr('disabled', false);
+            $('#content').attr('disabled', false);
+            $('#lastModifyModal').hide();
+            $("#modalCard").modal('show');
+            $("#formAddCard").trigger("reset");
+
+            $('#saveCardModal').off('click').on("click", () => {
+                $('#modalCard').modal('hide');
+                let data = $('#formAddCard').serialize();
+                const noteId = cards.length;
+
+                cards.push({
+                    id: noteId,
+                    title: $('#title').val(),
+                    subtitle: $('#subtitle').val(),
+                    content: $('#content').val(),
+                    lastMofity: moment().format('DD/MM/YYYY HH:mm')
+                });
+
+                $('#cards').append(`
+                <div class="col-md-3 card-note" id="note${noteId}"> 
+                    <input type="hidden" id="id" value="${noteId}"">
+                    <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">${$('#title').val()}</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">${$('#subtitle').val()}</h6>
+                        <p class="card-text">${$('#content').val()}</p>
+                        <p class="card-text" id="lastModify">Last Modify : ${moment().format('DD/MM/YYYY HH:mm')}</p>
+                        <button onClick="deleteNote(${noteId})" class="btn btn-danger btnDelete">Delete Note</button>
+                        <button onClick="showNote(${noteId})" class="btn btn-primary">See Note</button>
+                        <button onClick="editNote(${noteId})" class="btn btn-warning">Edit Note</button>
+                    </div>
+                    </div>
+                </div>
+            `);
+
+                // $('.btnDelete').off("click").on("click", (this) => {
+                //     console.log(this);
+                // })
+            })
+        })
+
+        $('#closeCardModal').on("click", () => {
+            $('#modalCard').modal('hide');
+            $("#formAddCard").trigger("reset");
+        })
+
+
+    })
+
+    function showNote(noteId) {
+        const note = cards.find(card => card.id == noteId);
+        $('#saveCardModal').hide();
+        $('#title').val(note.title).attr('disabled', true);
+        $('#subtitle').val(note.subtitle).attr('disabled', true);
+        $('#content').val(note.content).attr('disabled', true);
+        $('#dateModify').val(note.lastMofity).attr('disabled', true);
+        $('#lastModifyModal').show();
+        $("#modalCard").modal('show');
+    }
+
+    function deleteNote(noteId) {
+        $(`#note${noteId}`).remove();
+    }
+
+    function editNote(noteId) {
+        $("#modalCard").modal('show');
+        $('#title').val(cards[noteId].title).attr('disabled', false);
+        $('#subtitle').val(cards[noteId].subtitle).attr('disabled', false);
+        $('#content').val(cards[noteId].content).attr('disabled', false);
+        $('#dateModify').val(cards[noteId].lastMofity).attr('disabled', false);
+        $('#saveCardModal').show();
+        $('#saveCardModal').off("click").on("click", () => {
+            cards[noteId] = {
+                id: noteId,
+                title: $('#title').val(),
+                subtitle: $('#subtitle').val(),
+                content: $('#content').val(),
+                lastMofity: moment().format('DD/MM/YYYY HH:mm')
+            }
+            $('#cards').html('');
+            cards.forEach(card => {
+                $('#cards').append(`
+            <div class="col-md-6 card-note" id="note${noteId}"> 
+                    <input type="hidden" id="id" value="${noteId}"">
+                    <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">${card.title}</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">${card.subtitle}</h6>
+                        <p class="card-text">${$('#content').val()}</p>
+                        <p class="card-text" id="lastModify">Last Modify : ${card.lastMofity}</p>
+                        <button onClick="deleteNote(${noteId})" class="btn btn-danger btnDelete">Delete Note</button>
+                        <button onClick="showNote(${noteId})" class="btn btn-primary">See Note</button>
+                        <button onClick="editNote(${noteId})" class="btn btn-warning">Edit Note</button>
+                    </div>
+                    </div>
+                </div>
+            `)
+            })
+        })
+
+    }
+
+</script>
+
+</html>

@@ -1,0 +1,22 @@
+body {
+  background-color: #edf1f5 !important;
+}
+
+.main-row {
+  margin-top: 2em;
+  background-color: white;
+  border-radius: 1em;
+}
+
+.btn-add-note {
+  position: fixed;
+  top: 80%;
+  left: 85%;
+}
+
+.card-note {
+  margin-top: 2% !important;
+  margin-left: 2% !important;
+  margin-bottom: 2% !important;
+  position: relative;
+}
